@@ -8,10 +8,13 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "Leonardo Mayoral <mayoral.leonardo99@gmail.com>",
   "license": "ISC",
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.18.1",
+    "firebase": "^8.0.0",
     "nodemon": "^2.0.16"
-  }
+  },
+  "repository": "https://github.com/mayoral-leonardo/eye-lock-back.git"
 }
