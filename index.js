@@ -5,13 +5,12 @@ const firebase = require('firebase');
 const app = express();
 
 const firebaseConfig = {
-  apiKey: "AIzaSyA0zut6Ar3H_MQNo3FSvIHy1vMA9H6744k",
-  authDomain: "eye-lock-databse.firebaseapp.com",
-  projectId: "eye-lock-databse",
-  storageBucket: "eye-lock-databse.appspot.com",
-  messagingSenderId: "179459470410",
-  appId: "1:179459470410:web:17478d91ac1617c58722b3",
-  measurementId: "G-X00X46NGY9"
+  apiKey: "AIzaSyAfERv7uYBO5nCS_zNy9NdJy4vdcIBW6Ss",
+  authDomain: "eye-lock-database.firebaseapp.com",
+  projectId: "eye-lock-database",
+  storageBucket: "eye-lock-database.appspot.com",
+  messagingSenderId: "176501973151",
+  appId: "1:176501973151:web:a2cce711d2e7892aeb42aa"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -26,32 +25,28 @@ app.listen(3000, () => {
   console.log('Servidor iniciado na porta 3000');
 });
 
-// Rota de get para teste
-app.get('/', (req, res) => {
-  res.send([{
-    message: 'Hello World',
-    users: [
-      {
-        name: 'Leonardo',
-        age: '23'
-      },
-      {
-        name: 'Anna Beatriz',
-        age: '22'
-      }
-    ]
-  }]);
+// Rota de get para usuários
+app.get('/usuarios', async (req, res) => {
+  const snapshot = await usuarios.get();
+  const allUsers = snapshot.docs.map(doc => ({
+    nome: doc.data().nome,
+    idade: doc.data().idade,
+    imagem: doc.data().imagem,
+    ...doc.data()
+  }));
+  res.send(allUsers);
 });
 
 // Rota de post para cadastro de usuário
-app.post('/cadastro', (req, res) => {
+app.post('/cadastro', async (req, res) => {
   const data = req.body;
 
-  usuarios.add(data)
+  await usuarios.add({ level: "admin", ...data })
     .then(() => {
       res.status(201).send({
         message: 'Usuário cadastrado com sucesso'
       });
+      console.log('Usuário cadastrado com sucesso' + '' + data.nome + '' + data.idade);
     }).catch(() => {
       res.status(400).send({
         message: 'Erro ao cadastrar usuário'
