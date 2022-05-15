@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const firebase = require('firebase');
-const crypto = require("crypto");
+// const crypto = require("crypto");
 
 const app = express();
 
@@ -30,7 +30,7 @@ app.listen(3000, () => {
 app.get('/usuarios/all', async (req, res) => {
   const snapshot = await usuarios.get();
   const allUsers = snapshot.docs.map(doc => ({
-    id: doc.data().id,
+    id: doc.id,
     nome: doc.data().nome,
     email: doc.data().email,
     ...doc.data()
@@ -42,7 +42,7 @@ app.get('/usuarios/all', async (req, res) => {
 app.get('/usuarios/residents', async (req, res) => {
   const snapshot = await usuarios.get();
   const allUsers = snapshot.docs.map(doc => ({
-    id: doc.data().id,
+    id: doc.id,
     nome: doc.data().nome,
     email: doc.data().email,
     ...doc.data()
@@ -56,7 +56,7 @@ app.get('/usuarios/residents', async (req, res) => {
 app.get('/usuarios/visitors', async (req, res) => {
   const snapshot = await usuarios.get();
   const allUsers = snapshot.docs.map(doc => ({
-    id: doc.data().id,
+    id: doc.id,
     nome: doc.data().nome,
     email: doc.data().email,
     ...doc.data()
@@ -71,23 +71,27 @@ app.get('/usuarios/:id', async (req, res) => {
   const id = req.params.id;
   const snapshot = await usuarios.get();
   const allUsers = snapshot.docs.map(doc => ({
-    id: doc.data().id,
+    id: doc.id,
     nome: doc.data().nome,
     email: doc.data().email,
     ...doc.data()
   }));
 
   const user = allUsers.find(user => user.id === id);
-  res.send(user);
+  if (user) {
+    res.send(user);
+  } else {
+    res.status(404).send('Usuário não encontrado');
+  }
 });
 
 // Rota de post para cadastro de usuário residente
 app.post('/cadastro/resident', async (req, res) => {
   const data = req.body;
-  const id = crypto.randomBytes(16).toString("hex");
+  // const id = crypto.randomBytes(16).toString("hex");
 
   const user = {
-    id,
+    // id,
     level: 'resident',
     nome: data.nome,
     email: data.email,
@@ -110,10 +114,10 @@ app.post('/cadastro/resident', async (req, res) => {
 // Rota de post para cadastro de usuário visitante
 app.post('/cadastro/visitor', async (req, res) => {
   const data = req.body;
-  const id = crypto.randomBytes(16).toString("hex");
+  // const id = crypto.randomBytes(16).toString("hex");
 
   const user = {
-    id,
+    // id,
     level: 'visitor',
     nome: data.nome,
     email: data.email,
