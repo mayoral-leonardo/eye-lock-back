@@ -24,8 +24,8 @@ app.use(express.json());
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 
-app.listen(3000, () => {
-  console.log('Servidor iniciado na porta 3000');
+app.listen(4000, () => {
+  console.log('Servidor iniciado na porta 4000');
 });
 
 // Rota de get para usuários
@@ -130,7 +130,7 @@ app.delete('/usuarios/delete/:id', async (req, res) => {
 // Teste de autenticação
 
 // Rota de post para criação de usuário residente com autenticação
-app.post('/cadastro/resident', async (req, res) => {
+app.post('/register/resident', async (req, res) => {
   const data = req.body;
 
   const user = {
@@ -165,7 +165,7 @@ app.post('/cadastro/resident', async (req, res) => {
 });
 
 // Rota de post para criação de usuário visitante com autenticação
-app.post('/cadastro/visitor', async (req, res) => {
+app.post('/register/visitor', async (req, res) => {
   const data = req.body;
 
   const user = {
@@ -204,7 +204,6 @@ app.post('/login', async (req, res) => {
   const data = req.body;
 
   const user = {
-    name: data.name,
     email: data.email,
     password: data.password,
   }
@@ -217,16 +216,34 @@ app.post('/login', async (req, res) => {
         const userProfile = await firebase.firestore().collection('usersTesteBack').doc(uid).get();
 
         let data = {
-          id: uid,
-          name: userProfile.data().name,
-          level: userProfile.data().level,
-          email: userProfile.data().email,
-
-          ...userProfile.data(),
+          user: {
+            id: uid,
+            name: userProfile.data().name,
+            level: userProfile.data().level,
+            email: userProfile.data().email,
+            ...userProfile.data(),
+          }
         };
 
         res.send(data);
+        console.log(`Usuário ${data.user.name} logado com sucesso`);
 
+      })
+  } catch (error) {
+    res.status(400).send({
+      message: error
+    });
+  }
+});
+
+// Rota de post para logout de usuário
+app.post('/logout', async (req, res) => {
+
+  try {
+    await firebase.auth().signOut()
+      .then(() => {
+        res.send({ message: 'Usuário deslogado com sucesso' });
+        console.log('Usuário deslogado com sucesso');
       })
   } catch (error) {
     res.status(400).send({
