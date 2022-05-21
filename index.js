@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const firebase = require('firebase');
-// const crypto = require("crypto");
 
 const app = express();
 
@@ -14,9 +13,12 @@ const firebaseConfig = {
   appId: "1:176501973151:web:a2cce711d2e7892aeb42aa"
 };
 
-firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+
 const db = firebase.firestore();
-const usuarios = db.collection('usuarios');
+const usuarios = db.collection('usersTesteBack');
 
 app.use(express.json());
 app.use(cors());
@@ -81,60 +83,8 @@ app.get('/usuarios/:id', async (req, res) => {
   if (user) {
     res.send(user);
   } else {
-    res.status(404).send('Usuário não encontrado');
+    res.status(404).send({message: 'Usuário não encontrado'});
   }
-});
-
-// Rota de post para cadastro de usuário residente
-app.post('/cadastro/resident', async (req, res) => {
-  const data = req.body;
-  // const id = crypto.randomBytes(16).toString("hex");
-
-  const user = {
-    // id,
-    level: 'resident',
-    nome: data.nome,
-    email: data.email,
-    senha: data.senha,
-  }
-
-  await usuarios.add(user)
-    .then(() => {
-      res.status(201).send({
-        message: 'Usuário cadastrado com sucesso'
-      });
-      console.log(`Usuário ${user.nome} cadastrado com sucesso`);
-    }).catch((error) => {
-      res.status(400).send({
-        message: error
-      });
-    });
-});
-
-// Rota de post para cadastro de usuário visitante
-app.post('/cadastro/visitor', async (req, res) => {
-  const data = req.body;
-  // const id = crypto.randomBytes(16).toString("hex");
-
-  const user = {
-    // id,
-    level: 'visitor',
-    nome: data.nome,
-    email: data.email,
-    senha: data.senha,
-  }
-
-  await usuarios.add(user)
-    .then(() => {
-      res.status(201).send({
-        message: 'Usuário cadastrado com sucesso'
-      });
-      console.log(`Usuário ${user.nome} cadastrado com sucesso`);
-    }).catch((error) => {
-      res.status(400).send({
-        message: error
-      });
-    });
 });
 
 // Rota de put para atualização de usuário
@@ -170,4 +120,77 @@ app.delete('/usuarios/delete/:id', async (req, res) => {
         message: error
       });
     });
+});
+
+//////////////////////////////////////////////////////////////
+// Teste de autenticação
+
+// Rota de post para criação de usuário residente com autenticação
+app.post('/cadastro/resident', async (req, res) => {
+  const data = req.body;
+
+  const user = {
+    name: data.name,
+    email: data.email,
+    password: data.password,
+  }
+
+  try {
+    await firebase.auth().createUserWithEmailAndPassword(user.email, user.password)
+      .then(async (value) => {
+        let uid = value.user.uid;
+
+        await firebase.firestore().collection('usersTesteBack')
+          .doc(uid).set({
+            name: user.name,
+            level: 'resident',
+            email: user.email,
+            avatarUrl: null,
+          })
+          .then(() => {
+            console.log(`Usuário ${user.name} cadastrado com sucesso`);
+          })
+          res.status(201).send({ message: 'Usuário cadastrado com sucesso' });
+
+      })
+  } catch (error) {
+    res.status(400).send({
+      message: error
+    });
+  }
+});
+
+// Rota de post para criação de usuário visitante com autenticação
+app.post('/cadastro/visitor', async (req, res) => {
+  const data = req.body;
+
+  const user = {
+    name: data.name,
+    email: data.email,
+    password: data.password,
+  }
+
+  try {
+    await firebase.auth().createUserWithEmailAndPassword(user.email, user.password)
+      .then(async (value) => {
+        let uid = value.user.uid;
+
+        await firebase.firestore().collection('usersTesteBack')
+          .doc(uid).set({
+            name: user.name,
+            level: 'visitor',
+            email: user.email,
+            avatarUrl: null,
+          })
+          .then(() => {
+            console.log(`Usuário ${user.name} cadastrado com sucesso`);
+          })
+          res.status(201).send({ message: 'Usuário cadastrado com sucesso' });
+
+      })
+  } catch (error) {
+    res.status(400).send({
+      message: error
+    });
+  }
 });
