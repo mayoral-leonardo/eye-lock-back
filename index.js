@@ -33,7 +33,8 @@ app.get('/usuarios/all', async (req, res) => {
   const snapshot = await usuarios.get();
   const allUsers = snapshot.docs.map(doc => ({
     id: doc.id,
-    nome: doc.data().nome,
+    name: doc.data().name,
+    level: doc.data().level,
     email: doc.data().email,
     ...doc.data()
   }));
@@ -45,7 +46,8 @@ app.get('/usuarios/residents', async (req, res) => {
   const snapshot = await usuarios.get();
   const allUsers = snapshot.docs.map(doc => ({
     id: doc.id,
-    nome: doc.data().nome,
+    name: doc.data().name,
+    level: doc.data().level,
     email: doc.data().email,
     ...doc.data()
   }));
@@ -59,7 +61,8 @@ app.get('/usuarios/visitors', async (req, res) => {
   const snapshot = await usuarios.get();
   const allUsers = snapshot.docs.map(doc => ({
     id: doc.id,
-    nome: doc.data().nome,
+    name: doc.data().name,
+    level: doc.data().level,
     email: doc.data().email,
     ...doc.data()
   }));
@@ -74,7 +77,8 @@ app.get('/usuarios/:id', async (req, res) => {
   const snapshot = await usuarios.get();
   const allUsers = snapshot.docs.map(doc => ({
     id: doc.id,
-    nome: doc.data().nome,
+    name: doc.data().name,
+    level: doc.data().level,
     email: doc.data().email,
     ...doc.data()
   }));
@@ -83,7 +87,7 @@ app.get('/usuarios/:id', async (req, res) => {
   if (user) {
     res.send(user);
   } else {
-    res.status(404).send({message: 'Usuário não encontrado'});
+    res.status(404).send({ message: 'Usuário não encontrado' });
   }
 });
 
@@ -150,7 +154,7 @@ app.post('/cadastro/resident', async (req, res) => {
           .then(() => {
             console.log(`Usuário ${user.name} cadastrado com sucesso`);
           })
-          res.status(201).send({ message: 'Usuário cadastrado com sucesso' });
+        res.status(201).send({ message: 'Usuário cadastrado com sucesso' });
 
       })
   } catch (error) {
@@ -185,7 +189,43 @@ app.post('/cadastro/visitor', async (req, res) => {
           .then(() => {
             console.log(`Usuário ${user.name} cadastrado com sucesso`);
           })
-          res.status(201).send({ message: 'Usuário cadastrado com sucesso' });
+        res.status(201).send({ message: 'Usuário cadastrado com sucesso' });
+
+      })
+  } catch (error) {
+    res.status(400).send({
+      message: error
+    });
+  }
+});
+
+// Rota de post para autenticação e login de usuário
+app.post('/login', async (req, res) => {
+  const data = req.body;
+
+  const user = {
+    name: data.name,
+    email: data.email,
+    password: data.password,
+  }
+
+  try {
+    await firebase.auth().signInWithEmailAndPassword(user.email, user.password)
+      .then(async (value) => {
+        let uid = value.user.uid;
+
+        const userProfile = await firebase.firestore().collection('usersTesteBack').doc(uid).get();
+
+        let data = {
+          id: uid,
+          name: userProfile.data().name,
+          level: userProfile.data().level,
+          email: userProfile.data().email,
+
+          ...userProfile.data(),
+        };
+
+        res.send(data);
 
       })
   } catch (error) {
