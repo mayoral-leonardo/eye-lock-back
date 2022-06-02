@@ -126,18 +126,19 @@ app.delete('/usuarios/delete/:id', async (req, res) => {
     });
 });
 
-//////////////////////////////////////////////////////////////
-// Teste de autenticação
-
-// Rota de post para criação de usuário residente com autenticação
-app.post('/register/resident', async (req, res) => {
+// Rota de post para criação de usuário com autenticação
+app.post('/register/', async (req, res) => {
   const data = req.body;
 
   const user = {
     name: data.name,
+    level: data.level,
     email: data.email,
     password: data.password,
+    avatarUrl: ''
   }
+
+  if (data.avatarUrl) user.avatarUrl = data.avatarUrl;
 
   try {
     await firebase.auth().createUserWithEmailAndPassword(user.email, user.password)
@@ -147,44 +148,9 @@ app.post('/register/resident', async (req, res) => {
         await firebase.firestore().collection('usersTesteBack')
           .doc(uid).set({
             name: user.name,
-            level: 'resident',
+            level: user.level,
             email: user.email,
-            avatarUrl: null,
-          })
-          .then(() => {
-            console.log(`Usuário ${user.name} cadastrado com sucesso`);
-          })
-        res.status(201).send({ message: 'Usuário cadastrado com sucesso' });
-
-      })
-  } catch (error) {
-    res.status(400).send({
-      message: error
-    });
-  }
-});
-
-// Rota de post para criação de usuário visitante com autenticação
-app.post('/register/visitor', async (req, res) => {
-  const data = req.body;
-
-  const user = {
-    name: data.name,
-    email: data.email,
-    password: data.password,
-  }
-
-  try {
-    await firebase.auth().createUserWithEmailAndPassword(user.email, user.password)
-      .then(async (value) => {
-        let uid = value.user.uid;
-
-        await firebase.firestore().collection('usersTesteBack')
-          .doc(uid).set({
-            name: user.name,
-            level: 'visitor',
-            email: user.email,
-            avatarUrl: null,
+            avatarUrl: user.avatarUrl,
           })
           .then(() => {
             console.log(`Usuário ${user.name} cadastrado com sucesso`);
