@@ -135,10 +135,10 @@ app.post('/register/', async (req, res) => {
     level: data.level,
     email: data.email,
     password: data.password,
-    avatarUrl: ''
+    avatar: ''
   }
 
-  if (data.avatarUrl) user.avatarUrl = data.avatarUrl;
+  if (data.avatar) user.avatar = data.avatar;
 
   try {
     await firebase.auth().createUserWithEmailAndPassword(user.email, user.password)
@@ -150,7 +150,7 @@ app.post('/register/', async (req, res) => {
             name: user.name,
             level: user.level,
             email: user.email,
-            avatarUrl: user.avatarUrl,
+            avatar: user.avatar,
           })
           .then(() => {
             console.log(`Usuário ${user.name} cadastrado com sucesso`);
