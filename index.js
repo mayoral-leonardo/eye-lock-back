@@ -38,37 +38,7 @@ app.get('/usuarios/all', async (req, res) => {
     email: doc.data().email,
     ...doc.data()
   }));
-  res.send(allUsers);
-});
-
-// Rota de get para usuários residentes
-app.get('/usuarios/residents', async (req, res) => {
-  const snapshot = await usuarios.get();
-  const allUsers = snapshot.docs.map(doc => ({
-    id: doc.id,
-    name: doc.data().name,
-    level: doc.data().level,
-    email: doc.data().email,
-    ...doc.data()
-  }));
-
-  const residents = allUsers.filter(user => user.level === 'resident');
-  res.send(residents);
-});
-
-// Rota de get para usuários visitantes
-app.get('/usuarios/visitors', async (req, res) => {
-  const snapshot = await usuarios.get();
-  const allUsers = snapshot.docs.map(doc => ({
-    id: doc.id,
-    name: doc.data().name,
-    level: doc.data().level,
-    email: doc.data().email,
-    ...doc.data()
-  }));
-
-  const visitors = allUsers.filter(user => user.level === 'visitor');
-  res.send(visitors);
+  res.send(allUsers.filter(user => user.level !== 'admin'));
 });
 
 // Rota de get para usuário específico
@@ -135,10 +105,7 @@ app.post('/register/', async (req, res) => {
     level: data.level,
     email: data.email,
     password: data.password,
-    avatar: ''
   }
-
-  if (data.avatar) user.avatar = data.avatar;
 
   try {
     await firebase.auth().createUserWithEmailAndPassword(user.email, user.password)
@@ -150,7 +117,6 @@ app.post('/register/', async (req, res) => {
             name: user.name,
             level: user.level,
             email: user.email,
-            avatar: user.avatar,
           })
           .then(() => {
             console.log(`Usuário ${user.name} cadastrado com sucesso`);
@@ -181,19 +147,23 @@ app.post('/login', async (req, res) => {
 
         const userProfile = await firebase.firestore().collection('usersTesteBack').doc(uid).get();
 
-        let data = {
-          user: {
-            id: uid,
-            name: userProfile.data().name,
-            level: userProfile.data().level,
-            email: userProfile.data().email,
-            ...userProfile.data(),
-          }
-        };
+        if (userProfile.exists) {
 
-        res.send(data);
-        console.log(`Usuário ${data.user.name} logado com sucesso`);
+          let data = {
+            user: {
+              id: uid,
+              name: userProfile.data().name,
+              level: userProfile.data().level,
+              email: userProfile.data().email,
+              ...userProfile.data(),
+            }
+          };
 
+          res.send(data);
+          console.log(`Usuário ${data.user.name} logado com sucesso`);
+        } else {
+          res.status(404).send({ message: 'Usuário não encontrado' });
+        }
       })
   } catch (error) {
     res.status(400).send({
