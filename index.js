@@ -18,7 +18,7 @@ if (!firebase.apps.length) {
 }
 
 const db = firebase.firestore();
-const usuarios = db.collection('usersTesteBack');
+const usuarios = db.collection('users');
 
 app.use(express.json());
 app.use(cors());
@@ -112,7 +112,7 @@ app.post('/register/', async (req, res) => {
       .then(async (value) => {
         let uid = value.user.uid;
 
-        await firebase.firestore().collection('usersTesteBack')
+        await usuarios
           .doc(uid).set({
             name: user.name,
             level: user.level,
@@ -145,7 +145,7 @@ app.post('/login', async (req, res) => {
       .then(async (value) => {
         let uid = value.user.uid;
 
-        const userProfile = await firebase.firestore().collection('usersTesteBack').doc(uid).get();
+        const userProfile = await usuarios.doc(uid).get();
 
         if (userProfile.exists) {
 
