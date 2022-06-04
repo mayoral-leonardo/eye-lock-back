@@ -126,7 +126,7 @@ app.post('/register/', async (req, res) => {
       })
   } catch (error) {
     res.status(400).send({
-      message: error
+      error: error
     });
   }
 });
@@ -162,12 +162,12 @@ app.post('/login', async (req, res) => {
           res.send(data);
           console.log(`Usuário ${data.user.name} logado com sucesso`);
         } else {
-          res.status(404).send({ message: 'Usuário não encontrado' });
+          res.status(404).send({ error: 'Usuário não encontrado' });
         }
       })
   } catch (error) {
     res.status(400).send({
-      message: error
+      error: error
     });
   }
 });
